@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberQuiz - Console Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e);
+            color: #00ff00;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: backgroundShift 10s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { background: linear-gradient(135deg, #0f0f23, #1a1a2e, #16213e); }
+            50% { background: linear-gradient(135deg, #16213e, #0f0f23, #1a1a2e); }
+        }
+
+        .console-container {
+            width: 95%;
+            max-width: 900px;
+            height: 80vh;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.3),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .console-header {
+            background: linear-gradient(90deg, #00ff00, #00cc00);
+            color: #000;
+            padding: 12px 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 255, 0, 0.3);
+        }
+
+        .console-title {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 25px;
+            height: 25px;
+            background: #000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .status {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .console-body {
+            height: calc(100% - 60px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .output-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .input-area {
+            padding: 15px 20px;
+            background: rgba(0, 20, 0, 0.5);
+            border-top: 1px solid #00ff00;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .prompt {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .input-field {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+            padding: 5px;
+            border-bottom: 1px solid #00ff00;
+        }
+
+        .input-field:focus {
+            box-shadow: 0 1px 0 #00ff00;
+        }
+
+        .line {
+            margin: 5px 0;
+            word-wrap: break-word;
+        }
+
+        .system {
+            color: #00ccff;
+        }
+
+        .user {
+            color: #ffff00;
+        }
+
+        .success {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .question {
+            color: #ffffff;
+            background: rgba(0, 100, 255, 0.1);
+            padding: 10px;
+            border-left: 3px solid #0066ff;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .stats {
+            color: #ff6600;
+            background: rgba(255, 102, 0, 0.1);
+            padding: 8px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .cursor {
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .welcome-screen {
+            text-align: center;
+            padding: 40px 20px;
+            color: #00ff00;
+        }
+
+        .welcome-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px #00ff00; }
+            to { text-shadow: 0 0 20px #00ff00, 0 0 30px #00ff00; }
+        }
+
+        .welcome-subtitle {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #00ccff;
+        }
+
+        .instructions {
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto;
+            color: #cccccc;
+            line-height: 1.8;
+        }
+
+        @media (max-width: 768px) {
+            .console-container {
+                width: 98%;
+                height: 85vh;
+            }
+            
+            .console-header {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .console-title {
+                font-size: 16px;
+            }
+            
+            .output-area {
+                padding: 15px;
+                font-size: 13px;
+            }
+            
+            .input-area {
+                padding: 12px 15px;
+            }
+            
+            .welcome-title {
+                font-size: 20px;
+            }
+            
+            .welcome-subtitle {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .console-container {
+                height: 90vh;
+            }
+            
+            .output-area {
+                font-size: 12px;
+            }
+            
+            .input-field {
+                font-size: 12px;
+            }
+        }
+
+        .output-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .output-area::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .output-area::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border-radius: 4px;
+        }
+
+        .output-area::-webkit-scrollbar-thumb:hover {
+            background: #00cc00;
+        }
+    </style>
+</head>
+<body>
+    <div class="console-container">
+        <div class="console-header">
+            <div class="console-title">
+                <div class="logo">CQ</div>
+                CyberQuiz Terminal v2.1
+            </div>
+            <div class="status">
+                <span>READY</span>
+                <div class="status-dot"></div>
+            </div>
+        </div>
+        <div class="console-body">
+            <div class="output-area" id="output">
+                <div class="welcome-screen">
+                    <div class="welcome-title">🔒 CyberQuiz Challenge Console 🔒</div>
+                    <div class="welcome-subtitle">Kibertəhlükəsizlik biliklərini test et!</div>
+                    <div class="instructions">
+                        <p><strong>📋 İstifadə təlimatları:</strong></p>
+                        <br>
+                        • Quiz başlamaq üçün <span style="color: #00ff00;">"start"</span> yazın<br>
+                        • Sualları oxuyun və cavabınızı yazın<br>
+                        • Həmişə cavab seçimlərindən birini yazın<br>
+                        • Nəticəni görmək üçün quiz-i tamamlayın<br>
+                        • Yenidən başlamaq üçün <span style="color: #00ff00;">"restart"</span> yazın<br>
+                        <br>
+                        <span style="color: #ffff00;">💡 Məsləhət: Cavablar həssas deyil (böyük/kiçik hərf fərqi yoxdur)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="input-area">
+                <span class="prompt">cyber@quiz:~$</span>
+                <input type="text" class="input-field" id="userInput" placeholder="Komanda daxil edin...">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CyberQuiz {
+            constructor() {
+                this.questions = [
+                    {
+                        question: "🔐 Parolun güclü olması üçün minimum neçə simvoldan ibarət olmalıdır?",
+                        options: ["A) 6", "B) 8", "C) 10", "D) 12"],
+                        correct: "B",
+                        explanation: "Güclü parol minimum 8 simvoldan ibarət olmalıdır."
+                    },
+                    {
+                        question: "🦠 Kompüter viruslarından qorunmaq üçün ən vacib vasitə hansıdır?",
+                        options: ["A) Antivirus proqramı", "B) Firewall", "C) VPN", "D) Backup"],
+                        correct: "A",
+                        explanation: "Antivirus proqramları virusları aşkar edib silmək üçün əsas vasitədir."
+                    },
+                    {
+                        question: "📧 Phishing hücumlarından qorunmaq üçün nə etməli?",
+                        options: ["A) Bütün emailləri açmaq", "B) Şübhəli linklərə klik etməmək", "C) Parolları email vasitəsilə göndərmək", "D) Antivirus söndürmək"],
+                        correct: "B",
+                        explanation: "Şübhəli linklər phishing hücumlarının əsas vasitəsidir."
+                    },
+                    {
+                        question: "🔒 İki faktorlu autentifikasiya (2FA) nədir?",
+                        options: ["A) İki fərqli parol", "B) Parol + SMS kod", "C) İki fərqli email", "D) İki fərqli cihaz"],
+                        correct: "B",
+                        explanation: "2FA parol + əlavə təsdiq kodu (SMS, app) deməkdir."
+                    },
+                    {
+                        question: "🌐 HTTPS protokolu nə üçün istifadə olunur?",
+                        options: ["A) Sürəti artırmaq", "B) Məlumatları şifrələmək", "C) Reklamları bloklamaq", "D) Saitı gözəlləşdirmək"],
+                        correct: "B",
+                        explanation: "HTTPS protokolu məlumat mübadiləsini şifrələyir və təhlükəsiz edir."
+                    }
+                ];
+                
+                this.currentQuestion = 0;
+                this.score = 0;
+                this.gameStarted = false;
+                this.questionAnswered = false;
+                
+                this.outputArea = document.getElementById('output');
+                this.userInput = document.getElementById('userInput');
+                
+                this.initializeEventListeners();
+            }
+            
+            initializeEventListeners() {
+                this.userInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.processInput();
+                    }
+                });
+                
+                this.userInput.focus();
+            }
+            
+            processInput() {
+                const input = this.userInput.value.trim().toLowerCase();
+                this.addLine(`<span class="user">cyber@quiz:~$ ${this.userInput.value}</span>`);
+                this.userInput.value = '';
+                
+                if (!this.gameStarted) {
+                    if (input === 'start') {
+                        this.startQuiz();
+                    } else if (input === 'help') {
+                        this.showHelp();
+                    } else if (input === 'clear') {
+                        this.clearScreen();
+                    } else {
+                        this.addLine(`<span class="error">❌ Naməlum komanda: "${input}"</span>`);
+                        this.addLine(`<span class="system">💡 Mövcud komandalar: start, help, clear</span>`);
+                    }
+                } else {
+                    if (input === 'restart') {
+                        this.restartQuiz();
+                    } else {
+                        this.checkAnswer(input);
+                    }
+                }
+                
+                this.scrollToBottom();
+            }
+            
+            startQuiz() {
+                this.gameStarted = true;
+                this.currentQuestion = 0;
+                this.score = 0;
+                this.questionAnswered = false;
+                
+                this.addLine(`<span class="success">🚀 CyberQuiz başladı!</span>`);
+                this.addLine(`<span class="system">📊 Toplam sual sayı: ${this.questions.length}</span>`);
+                this.addLine(`<span class="system">⏱️ Hər sual üçün düşünə bilərsən!</span>`);
+                this.addLine('');
+                
+                setTimeout(() => {
+                    this.showQuestion();
+                }, 1000);
+            }
+            
+            showQuestion() {
+                if (this.currentQuestion < this.questions.length) {
+                    const q = this.questions[this.currentQuestion];
+                    this.questionAnswered = false;
+                    
+                    this.addLine(`<div class="question">`);
+                    this.addLine(`<strong>❓ Sual ${this.currentQuestion + 1}/${this.questions.length}:</strong>`);
+                    this.addLine(`${q.question}`);
+                    this.addLine('');
+                    q.options.forEach(option => {
+                        this.addLine(`   ${option}`);
+                    });
+                    this.addLine(`</div>`);
+                    this.addLine(`<span class="system">💭 Cavabınızı yazın (A, B, C və ya D):</span>`);
+                } else {
+                    this.showResults();
+                }
+            }
+            
+            checkAnswer(input) {
+                if (this.questionAnswered) {
+                    this.addLine(`<span class="error">⚠️ Bu sualı artıq cavabladınız! Növbəti sual üçün gözləyin...</span>`);
+                    return;
+                }
+                
+                const validAnswers = ['a', 'b', 'c', 'd'];
+                if (!validAnswers.includes(input)) {
+                    this.addLine(`<span class="error">❌ Yalnız A, B, C və ya D cavablarından birini yazın!</span>`);
+                    return;
+                }
+                
+                const currentQ = this.questions[this.currentQuestion];
+                const isCorrect = input.toUpperCase() === currentQ.correct;
+                
+                this.questionAnswered = true;
+                
+                if (isCorrect) {
+                    this.score++;
+                    this.addLine(`<span class="success">✅ Doğru cavab! Təbriklər!</span>`);
+                } else {
+                    this.addLine(`<span class="error">❌ Yanlış cavab!</span>`);
+                    this.addLine(`<span class="system">💡 Doğru cavab: ${currentQ.correct}</span>`);
+                }
+                
+                this.addLine(`<span class="system">📝 İzah: ${currentQ.explanation}</span>`);
+                this.addLine('');
+                
+                this.addLine(`<div class="stats">📊 Hazırkı statistika: ${this.score}/${this.currentQuestion + 1} doğru</div>`);
+                
+                this.currentQuestion++;
+                
+                setTimeout(() => {
+                    if (this.currentQuestion < this.questions.length) {
+                        this.addLine(`<span class="system">⏭️ Növbəti suala keçid...</span>`);
+                        this.addLine('');
+                        setTimeout(() => {
+                            this.showQuestion();
+                        }, 1500);
+                    } else {
+                        setTimeout(() => {
+                            this.showResults();
+                        }, 2000);
+                    }
+                }, 2000);
+            }
+            
+            showResults() {
+                this.addLine('');
+                this.addLine(`<span class="success">🏁 Quiz tamamlandı!</span>`);
+                this.addLine('');
+                
+                const percentage = Math.round((this.score / this.questions.length) * 100);
+                let performance, emoji;
+                
+                if (percentage >= 80) {
+                    performance = "Əla! Kibertəhlükəsizlik üzrə yaxşı bilikləriniz var!";
+                    emoji = "🥇";
+                } else if (percentage >= 60) {
+                    performance = "Yaxşı! Bəzi mövzuları daha çox öyrənməlisiniz.";
+                    emoji = "🥈";
+                } else if (percentage >= 40) {
+                    performance = "Orta səviyyə. Daha çox təcrübə lazımdır.";
+                    emoji = "🥉";
+                } else {
+                    performance = "Kibertəhlükəsizlik üzrə daha çox öyrənməlisiniz!";
+                    emoji = "📚";
+                }
+                
+                this.addLine(`<div class="stats">`);
+                this.addLine(`${emoji} <strong>NƏTİCƏ</strong>`);
+                this.addLine(`📊 Doğru cavablar: ${this.score}/${this.questions.length}`);
+                this.addLine(`📈 Faiz: ${percentage}%`);
+                this.addLine(`💬 Qiymətləndirmə: ${performance}`);
+                this.addLine(`</div>`);
+                
+                this.addLine('');
+                this.addLine(`<span class="system">🔄 Yenidən başlamaq üçün "restart" yazın</span>`);
+                this.addLine(`<span class="system">📋 Yardım üçün "help" yazın</span>`);
+                
+                this.gameStarted = false;
+            }
+            
+            restartQuiz() {
+                this.addLine(`<span class="system">🔄 Quiz yenidən başladılır...</span>`);
+                this.addLine('');
+                setTimeout(() => {
+                    this.startQuiz();
+                }, 1000);
+            }
+            
+            showHelp() {
+                this.addLine(`<span class="system">📋 CYBEQUIZ HELP</span>`);
+                this.addLine('');
+                this.addLine(`<span class="system">🔹 start    - Quiz-i başlat</span>`);
+                this.addLine(`<span class="system">🔹 restart  - Quiz-i yenidən başlat</span>`);
+                this.addLine(`<span class="system">🔹 help     - Bu kömək məlumatı</span>`);
+                this.addLine(`<span class="system">🔹 clear    - Ekranı təmizlə</span>`);
+                this.addLine('');
+                this.addLine(`<span class="system">💡 Quiz zamanı yalnız A, B, C və ya D yazın</span>`);
+            }
+            
+            clearScreen() {
+                this.outputArea.innerHTML = '';
+                this.addLine(`<span class="success">✨ Ekran təmizləndi</span>`);
+                this.addLine(`<span class="system">🚀 Başlamaq üçün "start" yazın</span>`);
+            }
+            
+            addLine(content) {
+                const line = document.createElement('div');
+                line.className = 'line';
+                line.innerHTML = content;
+                this.outputArea.appendChild(line);
+            }
+            
+            scrollToBottom() {
+                this.outputArea.scrollTop = this.outputArea.scrollHeight;
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            new CyberQuiz();
+        });
+        
+        console.log('%c🔒 CyberQuiz Console Loaded Successfully! 🔒', 'color: #00ff00; font-size: 16px; font-weight: bold;');
+        console.log('%cDeveloped for CyberQuiz Project', 'color: #00ccff; font-size: 12px;');
+    </script>
+</body>
+</html>
